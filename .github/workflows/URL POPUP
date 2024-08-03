@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL PiP Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            text-align: center;
+        }
+        #urlForm {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        #urlInput {
+            width: 300px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #addUrlButton {
+            padding: 10px;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+        #urlList {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .urlItem {
+            width: 300px;
+            height: 200px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .urlItem iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .closeButton {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        #viewUrlsButton {
+            display: block;
+            margin: 0 auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #urlPopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        #urlPopup h2 {
+            margin-top: 0;
+        }
+        #urlPopup ul {
+            list-style: none;
+            padding: 0;
+        }
+        #urlPopup li {
+            margin-bottom: 10px;
+        }
+        #urlPopup li input {
+            width: 80%;
+            padding: 5px;
+            font-size: 14px;
+        }
+        #closePopupButton {
+            display: block;
+            margin: 20px auto 0;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 500;
+        }
+        #floatingWidget {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 300px;
+            background: white;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        #floatingWidget h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        #floatingWidget ul {
+            list-style: decimal;
+            padding-left: 20px;
+        }
+        #floatingWidget li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #floatingWidget li input {
+            flex: 1;
+            padding: 5px;
+            font-size: 14px;
+        }
+        #floatingWidget li button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        #toggleWidgetButton {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <h1>URL PiP Viewer</h1>
+    <form id="urlForm">
+        <input type="text" id="urlInput" placeholder="Enter URL" required>
+        <button type="submit" id="addUrlButton">Add URL</button>
+    </form>
+    <button id="viewUrlsButton">View URLs</button>
+    <div id="urlList"></div>
+
+    <div id="overlay"></div>
+    <div id="urlPopup">
+        <h2>Stored URLs</h2>
+        <ul id="storedUrlList"></ul>
+        <button id="closePopupButton">Close</button>
+    </div>
+    <div id="floatingWidget" style="display: none;">
+        <h2>Stored URLs</h2>
+        <ul id="floatingStoredUrlList"></ul>
+    </div>
+    <button id="toggleWidgetButton">Show URLs</button>
+
+    <script>
+        document.getElementById('urlForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const urlInput = document.getElementById('urlInput');
+            const url = urlInput.value.trim();
+            if (url) {
+                addUrl(url);
+                urlInput.value = '';
+                storeUrl(url);
+            }
+        });
+
+        document.getElementById('viewUrlsButton').addEventListener('click', function() {
+            showPopup();
+        });
+
+        document.getElementById('closePopupButton').addEventListener('click', function() {
+            hidePopup();
+        });
+
+        document.getElementById('toggleWidgetButton').addEventListener('click', function() {
+            toggleWidget();
+        });
+
+        function addUrl(url) {
+            const urlList = document.getElementById('urlList');
+            const urlItem = document.createElement('div');
+            urlItem.className = 'urlItem';
+            
+            const iframe = document.createElement('iframe');
+            iframe.src = url;
+            urlItem.appendChild(iframe);
+
+            const closeButton = document.createElement('button');
+            closeButton.className = 'closeButton';
+            closeButton.innerHTML = '×';
+            closeButton.addEventListener('click', function() {
+                urlList.removeChild(urlItem);
+                removeUrl(url);
+            });
+            urlItem.appendChild(closeButton);
+
+            urlList.appendChild(urlItem);
+        }
+
+        function storeUrl(url) {
+            const storedUrls = JSON.parse(localStorage.getItem('storedUrls')) || [];
+            storedUrls.push(url);
+            localStorage.setItem('storedUrls', JSON.stringify(storedUrls));
+            updateStoredUrls();
+        }
+
+        function removeUrl(url) {
+            let storedUrls = JSON.parse(localStorage.getItem('storedUrls')) || [];
+            storedUrls = storedUrls.filter(storedUrl => storedUrl !== url);
+            localStorage.setItem('storedUrls', JSON.stringify(storedUrls));
+            updateStoredUrls();
+        }
+
+        function updateStoredUrls() {
+            const storedUrls = JSON.parse(localStorage.getItem('storedUrls')) || [];
+            const storedUrlList = document.getElementById('storedUrlList');
+            const floatingStoredUrlList = document.getElementById('floatingStoredUrlList');
+            storedUrlList.innerHTML = '';
+            floatingStoredUrlList.innerHTML = '';
+
+            storedUrls.forEach((url, index) => {
+                const listItem = document.createElement('li');
+                const urlInput = document.createElement('input');
+                urlInput.type = 'text';
+                urlInput.value = url;
+                urlInput.readOnly = true;
+                listItem.appendChild(urlInput);
+                const copyButton = document.createElement('button');
+                copyButton.textContent = 'Copy';
+                copyButton.addEventListener('click', function() {
+                    urlInput.select();
+                    document.execCommand('copy');
+                });
+                listItem.appendChild(copyButton);
+                storedUrlList.appendChild(listItem);
+
+                const floatingListItem = listItem.cloneNode(true);
+                floatingStoredUrlList.appendChild(floatingListItem);
+            });
+        }
+
+        function showPopup() {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('urlPopup').style.display = 'block';
+        }
+
+        function hidePopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('urlPopup').style.display = 'none';
+        }
+
+        function toggleWidget() {
+            const widget = document.getElementById('floatingWidget');
+            const toggleButton = document.getElementById('toggleWidgetButton');
+            if (widget.style.display === 'none') {
+                widget.style.display = 'block';
+                toggleButton.textContent = 'Hide URLs';
+            } else {
+                widget.style.display = 'none';
+                toggleButton.textContent = 'Show URLs';
+            }
+        }
+
+        // Initialize stored URLs on page load
+        updateStoredUrls();
+    </script>
+</body>
+</html>
