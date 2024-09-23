@@ -32,16 +32,16 @@ I love programming and am constantly learning. I aspire to become one of the bes
 
 Feel free to connect with me or check out my work!
 
-- [LinkedIn](your-linkedin-url)
-- [Twitter](your-twitter-url)
-- [Instagram](your-instagram-url)
+- [LinkedIn](https://www.linkedin.com/in/rydercashmedia?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app)
+- [Twitter](https://twitter.com/rydercashnews/)
+- [Instagram](https://instagram.com/rydercashmedia)
 
 ### Projects
 
 Here are a few of my projects:
 
-- **[Project Name](your-project-url)**: Brief description of the project.
-- **[Project Name](your-project-url)**: Brief description of the project.
+- **[Cr83](comingsoon)**: Civil rights pro se education app.
+- 
 
 ---
 
