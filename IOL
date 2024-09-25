@@ -16,7 +16,7 @@ Case Overview
     - Essential Elements for Plaintiff
     - Violation of Rights**
     - Constitutional Right Involved (e.g., Fourth Amendment, Eighth Amendment)
-					    - Specific wrongful acts by defendants
+		- Specific wrongful acts by defendants
     - State Action
     - Defendants acting under color of state law
     - Causation
